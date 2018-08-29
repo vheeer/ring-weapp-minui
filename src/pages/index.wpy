@@ -1,0 +1,195 @@
+<!-- index.wpy -->
+<style>
+  page {
+    background-color: #f8f8f8;
+    height: 100%;
+    word-wrap:break-word;
+  }
+  .swiper_box swiper image {
+    width: 100%;
+  }
+  .swiper_box swiper {
+    height: 180px;
+  }
+  button {
+    display:inline-block;
+    font-size:30rpx;
+    padding:10rpx 20rpx;
+  }
+  .btns {
+    position: fixed;
+    width: 750rpx;
+    bottom: 0rpx;
+    margin: 0 0 20rpx 0;
+    padding: 0 20rpx;
+  }
+  .btns button {
+    width: 100%;
+    background-color: green;
+    color: white;
+    font-size: 34rpx;
+  }
+  .message, .last, .executed {
+    text-align: center;
+    line-height: 200rpx;
+    font-size: 35rpx;
+  }
+  .last, .executed {
+    position: relative;
+    padding: 15rpx 20rpx;
+    text-align: left;
+    line-height: 45rpx;
+    margin: 0 0 20rpx 0;
+  }
+</style>
+<template>
+  <!-- 轮播开始 -->
+
+  <!-- 轮播结束 -->
+  <!-- 主体部分开始 -->
+  <!-- <v-scan :syncUserInfo.sync="userInfo" /> -->
+
+  <view class="message">状态：{{isStart?"运行中，请在后台选择要拨打的电话":"已暂停"}}</view>
+
+  <view class="executed">本次拨过的号码：{{executed}}</view>
+
+  <view class="last">上一次的拨号：{{lastGetNumber}}</view>
+
+  <view class="btns">
+    <v-getmobile wx:if="{{!userInfo.mobile || userInfo.mobile === ''}}"></v-getmobile>
+    <v-login wx:if="{{!userInfo.id}}"></v-login>
+    <button wx:if="{{!isStart}}" bindtap="start">开始</button>
+    <button wx:else bindtap="stop">结束</button>
+  </view>
+  <!-- 主体部分结束 -->
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Vscan from '../components/scan'
+  import Vshop from '../components/shop'
+  import Vlogin from '../components/login'
+  import { storage2data, request } from '../utils/util'
+  import { urls } from '../config/config'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: 'test',
+      usingComponents: {
+        'wxc-toast': '../../packages/@minui/wxc-toast/dist/index',
+        'wxc-button': '../../packages/@minui/wxc-button/dist/index',
+        'wxc-panel': '../../packages/@minui/wxc-panel/dist/index',
+        'wxc-cc': '../../packages/@minui/wxc-cc/dist/index',
+        'wxc-elip': '../../packages/@minui/wxc-elip/dist/index'
+      }
+    }
+    components = {
+      'v-scan': Vscan,
+      'v-login': Vlogin,
+      'v-shop': Vshop
+    }
+
+    mixins = []
+
+    data = {
+      imgUrls: [
+        '../static/image/dba2bd261ff861386afd05c8e5d502c7.jpg',
+        '../static/image/dba2bd261ff861386afd05c8e5d502c7.jpg',
+        '../static/image/dba2bd261ff861386afd05c8e5d502c7.jpg'
+      ],
+      '__wepy_iviewer_settings': {},
+      executed: [],
+      lastGetNumber: '',
+      timer: null,
+      userInfo: null,
+      isStart: false
+    }
+
+    computed = {}
+
+    async start() {
+      const _that = this
+      console.log('start 循环进行')
+
+      if (this.isStart === false) {
+        console.log('isStart 为 false 不请求')
+        return
+      }
+
+      console.log('请求开始')
+      const result = await request(urls.GetExecute + '?id=' + _that.userInfo.id, {}, 'GET')
+      console.log('请求结果', result)
+      let { execute } = result.data.data[0]
+      execute = execute.split(';')[0]
+      execute = execute.replace(/[^0-9]/ig, '')
+
+      if (!execute || execute === '') {
+        console.log('可执行为空 不拨号')
+        return
+      }
+
+      if (execute === this.lastGetNumber) {
+        console.log('上次拨过此号码 不拨号')
+        return
+      }
+
+      this.executed.push(execute)
+      this.lastGetNumber = execute
+      // this.isStart = false
+      clearInterval(this.timer)
+      this.$apply()
+
+      const executeResult = await wx.makePhoneCallP({ phoneNumber: execute })
+
+      if (executeResult.errMsg === 'makePhoneCall:ok') {
+        console.log('makePhoneCall:ok')
+      }
+    }
+
+    async clear() {
+      await request(urls.ClearExecute, { id: this.userInfo.id, execute: '' }, 'POST')
+    }
+
+    methods = {
+      async start() {
+        const _that = this
+
+        this.timer = setInterval(() => {
+          _that.start()
+        }, 300)
+
+        this.isStart = true
+
+        this.executed = []
+        this.lastGetNumber = ''
+
+        this.$apply()
+      },
+      async stop() {
+        this.isStart = false
+
+        this.clear()
+
+        clearInterval(this.timer)
+
+        this.$apply()
+      }
+    }
+
+    events = {}
+
+    async onLoad() {
+      // await wx.makePhoneCallP({ phoneNumber: '15022211134' })
+    }
+
+    async onShow() {
+      const _that = this
+      storage2data(this)
+      if (this.isStart) {
+        this.timer = setInterval(() => {
+          _that.start()
+        }, 300)
+      }
+    }
+  }
+</script>
