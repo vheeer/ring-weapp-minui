@@ -1,4 +1,4 @@
-var api = require('../config/config.js');
+var { urls } = require('../config/config.js');
 
 function formatTime(date) {
   var year = date.getFullYear()
@@ -50,7 +50,7 @@ function request(
               return getUserInfo();
             }).then((userInfo) => {
               //登录远程服务器
-              request(api.AuthLoginByWeixin, { code, userInfo }, 'POST').then(res => {
+              request(urls.GetUserInfo, { code, userInfo }, 'POST').then(res => {
                 if (res.errno === 0) {
                   //存储用户信息
                   wx.setStorageSync('userInfo', res.data.userInfo);

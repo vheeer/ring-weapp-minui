@@ -1,5 +1,5 @@
-const url = 'http://127.0.0.1:8361/api/';
-// const url = 'https://www.dapingkeji.cn/ring/api/';
+// const url = 'http://127.0.0.1:8361/api/';
+const url = 'https://www.dapingkeji.cn/ring/api/';
 
 module.exports = {
 	urls: {

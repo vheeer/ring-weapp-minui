@@ -54,6 +54,7 @@ import 'wepy-async-function'
 
 import { setStore } from 'wepy-redux'
 import configStore from './store'
+import userService from './service/user'
 
 const store = configStore()
 setStore(store)
@@ -111,7 +112,7 @@ export default class extends wepy.app {
     this.use('requestfix')
   }
 
-  onLaunch() {
+  async onLaunch() {
     // 函数Promise化
     this.config['promisify'].forEach(item => {
       wx[item + 'P'] = this.wxPromisify(wx[item])
@@ -119,6 +120,14 @@ export default class extends wepy.app {
     Object.assign(Date.prototype, { Format: this.Format })
     Object.assign(Date.prototype, { LeftTimer: this.LeftTimer })
     console.log(Date.prototype)
+
+    wx.clearStorage()
+    const loginResult = await userService.login()
+    console.log('loginResult', loginResult)
+    // request(api.AuthLoginByWeixin, { code, userInfo }, 'POST')
+    // .then(res => {
+    //   console.log('登录结果: ', res)
+    // });
   }
 
   // 日期格式化
