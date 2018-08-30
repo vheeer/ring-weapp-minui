@@ -66,27 +66,19 @@
 
 <script>
   import wepy from 'wepy'
-  import Vscan from '../components/scan'
-  import Vshop from '../components/shop'
   import Vlogin from '../components/login'
+  import Vgetmobile from '../components/getmobile'
   import { storage2data, request } from '../utils/util'
   import { urls } from '../config/config'
 
   export default class Index extends wepy.page {
     config = {
       navigationBarTitleText: 'test',
-      usingComponents: {
-        'wxc-toast': '../../packages/@minui/wxc-toast/dist/index',
-        'wxc-button': '../../packages/@minui/wxc-button/dist/index',
-        'wxc-panel': '../../packages/@minui/wxc-panel/dist/index',
-        'wxc-cc': '../../packages/@minui/wxc-cc/dist/index',
-        'wxc-elip': '../../packages/@minui/wxc-elip/dist/index'
-      }
+      usingComponents: {}
     }
     components = {
-      'v-scan': Vscan,
       'v-login': Vlogin,
-      'v-shop': Vshop
+      'v-getmobile': Vgetmobile
     }
 
     mixins = []
@@ -143,11 +135,12 @@
 
       if (executeResult.errMsg === 'makePhoneCall:ok') {
         console.log('makePhoneCall:ok')
+        await request(urls.TargetUpdateP, { execute }, 'POST')
       }
     }
 
     async clear() {
-      await request(urls.ClearExecute, { id: this.userInfo.id, execute: '' }, 'POST')
+      await request(urls.UpdateExecute, { id: this.userInfo.id, execute: '' }, 'POST')
     }
 
     methods = {
@@ -178,8 +171,10 @@
 
     events = {}
 
-    async onLoad() {
-      // await wx.makePhoneCallP({ phoneNumber: '15022211134' })
+    async onLoad() {}
+
+    async onhide() {
+      clearInterval(this.timer)
     }
 
     async onShow() {

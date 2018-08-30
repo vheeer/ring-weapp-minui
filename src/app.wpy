@@ -15,6 +15,7 @@ view {
   top: 0;
   left: 0;
   background: rgba(0,0,0,0.7);
+  opacity: 0;
   border: 0;
   margin: 0;
   padding: 0;
@@ -61,14 +62,7 @@ export default class extends wepy.app {
   config = {
     'pages': [
       'pages/index',
-      'pages/check',
-      'pages/service',
-      'pages/shop',
-      'pages/order',
-      'pages/refund_result',
-      'pages/ucenter/index',
-      'pages/ucenter/detail',
-      'pages/ucenter/idcard'
+      'pages/ucenter'
     ],
     'window': {
       backgroundTextStyle: 'light',
@@ -89,13 +83,7 @@ export default class extends wepy.app {
           'selectedIconPath': './static/image/home.png'
         },
         {
-          'pagePath': 'pages/service',
-          'text': '服务',
-          'iconPath': './static/image/service.png',
-          'selectedIconPath': './static/image/service.png'
-        },
-        {
-          'pagePath': 'pages/ucenter/index',
+          'pagePath': 'pages/ucenter',
           'text': '我的',
           'iconPath': './static/image/ucenter.png',
           'selectedIconPath': './static/image/ucenter.png'

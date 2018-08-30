@@ -1,10 +1,13 @@
-// const url = 'http://127.0.0.1:8361/api/';
-const url = 'https://www.dapingkeji.cn/ring/api/';
+const url = 'http://127.0.0.1:8361/api/';
+// const url = 'https://www.dapingkeji.cn/ring/api/';
 
 module.exports = {
 	urls: {
 		GetExecute: url + 'custom/match',
-		ClearExecute: url + 'custom/update',
+		UpdateExecute: url + 'custom/update',
+		Register: url + 'custom/register',
+
+		TargetUpdateP: url + 'target/updatep',
 
 		Login: url + 'auth/login', //微信登录
 		GetMobile: url + 'auth/getmobile', //获取手机号

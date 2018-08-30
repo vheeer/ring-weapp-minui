@@ -1,0 +1,131 @@
+<!-- index.wpy -->
+<style>
+  page {
+    background-color: #f8f8f8;
+    height: 100%;
+    word-wrap:break-word;
+  }
+  .input-wrap {
+    padding: 20rpx 70rpx;
+  }
+  .signup_box {
+    margin: 0 auto;
+    border-radius:200rpx;
+    width:80%;
+    overflow:hidden;
+    box-sizing:border-box;
+  }
+  .signup_box wxc-button button {
+    width:100%;
+  }
+
+  .signup {
+
+  }
+  .signup form {
+
+  }
+  .avatar {
+    position: relative;
+    width: 130rpx;
+    height: 130rpx;
+    border-radius: 200rpx;
+    overflow: hidden;
+    margin: 100rpx auto;
+  }
+  input {
+    height: 1.4rem !important;
+  }
+</style>
+<template>
+  <!-- 表单开始 -->
+  <view>
+    <v-login wx:if="{{!userInfo.id}}"></v-login>
+    <!-- 注册表单 -->
+    <view wx:if="{{!userInfo.account_username || userInfo.account_username === ''}}" class="container">
+      <view class="input-wrap">
+        <wxc-input type="text" data-type="username" title="账号" bind:input="input" placeholder="请输入账号"></wxc-input>
+        <wxc-input type="number" data-type="password" title="密码" bind:input="input" placeholder="请输入密码"></wxc-input>
+      </view>
+      <view class="signup_box">
+        <wxc-button class="signup" size="large" bind:tap="register" type="beauty">注册</wxc-button>
+      </view>
+    </view>
+    <!-- 已注册展示表单 -->
+    <view wx:else class="container">
+      <view class="avatar"><image src="{{userInfo.avatar}}" /></view>
+      <view class="input-wrap">
+        <wxc-input type="text" title="我的账号" value="{{userInfo.account_username}}"></wxc-input>
+        <wxc-input type="text" title="我的昵称" value="{{userInfo.nickname}}"></wxc-input>
+        <wxc-input type="text" title="我的电话" value="{{userInfo.mobile}}"></wxc-input>
+      </view>
+    </view>
+  </view>
+  <!-- 表单结束 -->
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Vlogin from '../components/login'
+  import { storage2data, request } from '../utils/util'
+  import { urls } from '../config/config'
+
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: 'test',
+      usingComponents: {
+        'wxc-input': '../../packages/@minui/wxc-input/dist/index',
+        'wxc-button': '../../packages/@minui/wxc-button/dist/index'
+      }
+    }
+    components = {
+      'v-login': Vlogin
+    }
+
+    mixins = []
+
+    data = {
+      username: '',
+      password: '',
+      userInfo: null,
+      changedFields: {}
+    }
+
+    computed = {}
+
+    methods = {
+      async register() {
+        const requestParams = {
+          id: this.userInfo.id,
+          ...this.changedFields
+        }
+        const resultR = await request(urls.Register, requestParams, 'POST', {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        })
+        console.log('resultR', resultR)
+
+        const resultG = await request(urls.GetUserInfo, {}, 'GET')
+        console.log('resultG', resultG)
+
+        wx.setStorageSync('userInfo', resultG.data)
+        this.userInfo = resultG.data
+
+        this.$apply()
+      },
+      input(e) {
+        const { type } = e.target.dataset
+        const { value } = e.detail
+        this.changedFields[type] = value
+      }
+    }
+
+    events = {}
+
+    async onLoad() {}
+
+    async onShow() {
+      const _that = this
+      storage2data(this)
+    }
+  }
+</script>
